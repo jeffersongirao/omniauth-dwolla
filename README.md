@@ -25,6 +25,6 @@ end
 ```
 The :scope param is optional.
 
-The :provider_ignores_state => true param is required for v1.1.1 of omniauth-oauth2, as Dwolla is not currently communicating state information between requests.
-
 The default :scope is 'accountinfofull'. It is necessary in order to grab the uid and detailed info for user.
+
+The :provider_ignores_state => true param is required for v1.1.1 of omniauth-oauth2, as Dwolla is not currently communicating state information between requests.
