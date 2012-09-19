@@ -20,9 +20,11 @@ Here's a quick example, adding the middleware to a Rails app in `config/initiali
 
 ```ruby
 Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :dwolla, ENV['DWOLLA_KEY'], ENV['DWOLLA_SECRET'], :scope => 'accountinfofull|send|request'
+  provider :dwolla, ENV['DWOLLA_KEY'], ENV['DWOLLA_SECRET'], :scope => 'accountinfofull|send|request', :provider_ignores_state => true
 end
 ```
 The :scope param is optional.
+
+The :provider_ignores_state => true param is required for v1.1.1 of omniauth-oauth2, as Dwolla is not currently communicating state information between requests.
 
 The default :scope is 'accountinfofull'. It is necessary in order to grab the uid and detailed info for user.
