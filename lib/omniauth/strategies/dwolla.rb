@@ -1,5 +1,4 @@
 require 'omniauth-oauth2'
-require 'dwolla'
 
 module OmniAuth
   module Strategies
@@ -12,17 +11,18 @@ module OmniAuth
         :token_url => '/oauth/v2/token'
       }
 
-      uid { user.id }
+      uid { raw_info['Response']['Id'] }
 
       info do
-        prune!({
-          'name'      => user.name,
-          'latitude'  => user.latitude,
-          'longitude' => user.longitude,
-          'city'      => user.city,
-          'state'     => user.state,
-          'type'      => user.type
-        })
+        {
+          :name => raw_info['Response']['Name'],
+        }
+      end
+      
+      extra do
+        {
+          :raw_info => raw_info['Response']
+        }
       end
 
       def authorize_params
@@ -30,18 +30,13 @@ module OmniAuth
           params[:scope] ||= DEFAULT_SCOPE
         end
       end
+      
+      def raw_info
+        access_token.options[:mode] = :query
+        access_token.options[:param_name] = :oauth_token
+        @raw_info ||= MultiJson.load(access_token.get('https://www.dwolla.com/oauth/rest/users/').body)
+      end
 
-      private
-        def user
-          @user ||= ::Dwolla::User.me(access_token.token).fetch
-        end
-
-        def prune!(hash)
-          hash.delete_if do |_, value| 
-            prune!(value) if value.is_a?(Hash)
-            value.nil? || (value.respond_to?(:empty?) && value.empty?)
-          end
-        end
      end
    end
 end
