@@ -43,20 +43,29 @@ describe OmniAuth::Strategies::Dwolla do
     end
 
     context 'when successful' do
-      it 'sets the correct info based on user' do
-        @access_token.should_receive(:get).with('/oauth/rest/users/').and_return(@access_token_response)
-        # note that the keys are all lowercase
-        # unlike the response that came back from Dwolla
-        expect(subject.info).to eq({ 'name'      => 'Test Name',
-                                     'latitude'  => '123',
-                                     'longitude' => '321',
-                                     'city'      => 'Sample City',
-                                     'state'     => 'TT',
-                                     'type'      => 'Personal' })
-      end
-
       it 'sets the correct uid based on user' do
         subject.uid.should == '12345'
+      end
+
+      describe 'fetching user info' do
+        before do
+          @access_token.should_receive(:get).with('/oauth/rest/users/').and_return(@access_token_response)
+        end
+
+        it 'sets the correct info based on user' do
+          # note that the keys are all lowercase
+          # unlike the response that came back from Dwolla
+          expect(subject.info).to eq({ 'name'      => 'Test Name',
+                                       'latitude'  => '123',
+                                       'longitude' => '321',
+                                       'city'      => 'Sample City',
+                                       'state'     => 'TT',
+                                       'type'      => 'Personal' })
+        end
+
+        it 'sets the extra hash' do
+          subject.extra['raw_info'].should == @dwolla_user
+        end
       end
     end
   end

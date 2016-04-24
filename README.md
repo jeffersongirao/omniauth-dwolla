@@ -28,14 +28,16 @@ scope permissions for full user info, send and request transactions:
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :dwolla, ENV['DWOLLA_KEY'], ENV['DWOLLA_SECRET'], 
   :scope                  => 'accountinfofull|send|request',
-  :provider_ignores_state => true
+  :provider_ignores_state => true,
+  :client_options => {:site => 'https://uat.dwolla.com'}
 end
 ```
 
-The `:scope` param is optional.
+The `:client_options` param is optional. The default :site is 'https://www.dwolla.com'.
 
-The default :scope is 'accountinfofull'. 
-It is necessary in order to grab the uid and detailed info for user.
+The `:scope` param is optional. The default :scope is 'accountinfofull'. 
+
+It is necessary in order to grab the detailed info for user.
 
 The extra hash will include:
 ```json
@@ -50,16 +52,6 @@ The extra hash will include:
     }
 ```
 
-## Exception Handling
-
-If the Dwolla library raises a `Dwolla::RequestException`, 
-that will be wrapped and re-raised as a 
-`OmniAuth::Strategies::OAuth2::CallbackError`.  The OmniAuth OAuth2 
-library will, in turn, treat that as a failure due to invalid 
-credentials, passing the `CallbackError` through Rack's middleware chain.
-
-Note that the `Devise::OmniauthCallbacksController` provides a 
-good example of handling this scenario.
 
 ## Maintainer's Note
 

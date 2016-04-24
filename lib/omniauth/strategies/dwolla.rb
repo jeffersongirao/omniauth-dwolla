@@ -28,6 +28,14 @@ module OmniAuth
         }
       end
 
+      extra do
+        unless skip_info?
+          { 'raw_info' => user }
+        else
+          {}
+        end
+      end
+
       def authorize_params
         super.tap do |params|
           params[:scope] ||= DEFAULT_SCOPE
