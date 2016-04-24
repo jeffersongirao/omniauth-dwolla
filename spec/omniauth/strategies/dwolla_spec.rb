@@ -26,7 +26,9 @@ describe OmniAuth::Strategies::Dwolla do
 
   describe 'getting info' do
     before do
-      @access_token = double(:token => 'test_token')
+      @access_token = double(
+        :token => 'test_token',
+        :params => {'account_id' => '12345'})
       @dwolla_user  = {       'Id' => '12345',
                               'Name' => 'Test Name',
                               'Latitude' => '123',
@@ -35,16 +37,15 @@ describe OmniAuth::Strategies::Dwolla do
                               'State' => 'TT',
                               'Type' => 'Personal' }
 
+      @access_token_response = double(:parsed => {
+        'Response' => @dwolla_user})
       subject.stub(:access_token) { @access_token }
     end
 
     context 'when successful' do
-      before do
-        ::Dwolla::Users.should_receive(:me).with(@access_token.token).and_return(@dwolla_user)
-      end
-
       it 'sets the correct info based on user' do
-        # note that the keys are all lowercase 
+        @access_token.should_receive(:get).with('/oauth/rest/users/').and_return(@access_token_response)
+        # note that the keys are all lowercase
         # unlike the response that came back from Dwolla
         expect(subject.info).to eq({ 'name'      => 'Test Name',
                                      'latitude'  => '123',
@@ -56,34 +57,6 @@ describe OmniAuth::Strategies::Dwolla do
 
       it 'sets the correct uid based on user' do
         subject.uid.should == '12345'
-      end
-    end
-
-    context 'when a Dwolla::AuthenticationError is raised' do
-      let(:auth_error) { ::Dwolla::AuthenticationError.new('Dwolla Error Message') }
-
-      before do
-        ::Dwolla::Users.should_receive(:me).with(@access_token.token).and_raise(auth_error)
-      end
-
-      it 're-raises the appropriate OAuth error' do
-        expect {
-          subject.uid
-        }.to raise_error(OmniAuth::Strategies::OAuth2::CallbackError)
-      end
-
-      it 'passes along the original exception' do
-        exception = nil
-
-        begin
-          subject.uid
-        rescue OmniAuth::Strategies::OAuth2::CallbackError => e
-          exception = e
-          exception.error.should eq(auth_error)
-          exception.error_reason.should eq(auth_error.message)
-        end
-
-        exception.should be
       end
     end
   end
