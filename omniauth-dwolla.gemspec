@@ -11,7 +11,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{OmniAuth strategy for Dwolla.}
   s.description = %q{OmniAuth strategy for Dwolla.}
   s.license     = 'MIT'
-END
   s.rubyforge_project = "omniauth-dwolla"
 
   s.files         = `git ls-files`.split("\n")
