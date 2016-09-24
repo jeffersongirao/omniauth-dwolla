@@ -11,13 +11,7 @@ Gem::Specification.new do |s|
   s.summary     = %q{OmniAuth strategy for Dwolla.}
   s.description = %q{OmniAuth strategy for Dwolla.}
   s.license     = 'MIT'
-  post_install_string =<<END
-Remember to specify
-    :provider_ignores_state => true
-When you set up your Dwolla OmniAuth provider.
 END
-  s.post_install_message = post_install_string
-
   s.rubyforge_project = "omniauth-dwolla"
 
   s.files         = `git ls-files`.split("\n")
