@@ -1,5 +1,4 @@
 require 'omniauth-oauth2'
-require 'dwolla'
 
 module OmniAuth
   module Strategies
@@ -12,21 +11,29 @@ module OmniAuth
         :token_url => '/oauth/v2/token'
       }
       #option :provider_ignores_state, true
-      # setting that has NO effect. 
+      # setting that has NO effect.
       # If anyone can figure a way to make it work
       # PLEASE issue a pull request. -masukomi
 
-      uid { user['Id'] }
+      uid { access_token.params['account_id'] }
 
       info do
-        prune!({
-         'name'      => user['Name'],
-         'latitude'  => user['Latitude'],
-         'longitude' => user['Longitude'],
-         'city'      => user['City'],
-         'state'     => user['State'],
-         'type'      => user['Type']
-     })
+        {
+          'name'      => user['Name'],
+          'latitude'  => user['Latitude'],
+          'longitude' => user['Longitude'],
+          'city'      => user['City'],
+          'state'     => user['State'],
+          'type'      => user['Type']
+        }
+      end
+
+      extra do
+        unless skip_info?
+          { 'raw_info' => user }
+        else
+          {}
+        end
       end
 
       def authorize_params
@@ -36,18 +43,10 @@ module OmniAuth
       end
 
       private
-        def user
-          @user ||= ::Dwolla::Users.me(access_token.token)
-        rescue ::Dwolla::DwollaError => e
-          raise CallbackError.new(e, e.message)
-        end
 
-        def prune!(hash)
-          hash.delete_if do |_, value| 
-            prune!(value) if value.is_a?(Hash)
-            value.nil? || (value.respond_to?(:empty?) && value.empty?)
-          end
-        end
-     end
-   end
+      def user
+        @user ||= access_token.get('/oauth/rest/users/').parsed['Response']
+      end
+    end
+  end
 end
